@@ -1,3 +1,5 @@
+use actix_cors::Cors;
+use actix_web::{HttpServer, middleware::Logger, App, http::header};
 use sqlx::{Postgres, Pool, postgres::PgPoolOptions};
 use dotenv::dotenv;
 
@@ -28,6 +30,26 @@ async fn main() -> std::io::Result<()> {
     };
 
     println!("server started successfully!");
+
+    let _ = HttpServer::new(move || {
+        let cors = Cors::default()
+            .allowed_methods(vec!["GET", "POST", "PUT", "DELETE"])
+            .allowed_origin("http://localhost:3000")
+            .allowed_headers(vec![
+                header::CONTENT_TYPE,
+                header::AUTHORIZATION,
+                header::CONTENT_ENCODING,
+                header::ACCEPT,
+            ])
+            .supports_credentials();
+
+        App::new()
+            .wrap(cors)
+    })
+    .bind(("127.0.0.1", 8080))?
+    .run()
+    .await;
+
     Ok(())
 
 }   
